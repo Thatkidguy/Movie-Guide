@@ -1,0 +1,135 @@
+# movie_guide.py
+
+# This program allows a user to manage a list of their favorite movies.
+# The list is stored persistently in a file named 'movies.txt'.
+
+# --- File Processing Section ---
+# The FILENAME constant holds the name of the file where movies are stored.
+FILENAME = "movies.txt"
+
+def read_movies_from_file():
+    """
+    FILE PROCESSING (READ):
+    This function opens 'movies.txt' for reading.
+    It reads each line from the file, treats each line as a movie title,
+    and populates a list with these titles.
+    If the file does not exist, it returns an empty list without an error.
+    """
+    try:
+        movies = []
+        with open(FILENAME, "r") as file:
+            for line in file:
+                # .strip() removes leading/trailing whitespace, including the newline character
+                movies.append(line.strip())
+        return movies
+    except FileNotFoundError:
+        # Return an empty list if the file hasn't been created yet.
+        return []
+
+def write_movies_to_file(movies_list):
+    """
+    FILE PROCESSING (WRITE):
+    This function opens 'movies.txt' for writing.
+    It writes every movie from the provided list into the file,
+    overwriting the file's previous contents. Each movie is on a new line.
+    """
+    with open(FILENAME, "w") as file:
+        for movie in movies_list:
+            file.write(f"{movie}\n")
+
+# --- User Interface and Logic Section ---
+
+def display_menu():
+    """
+    Displays the application's heading and the command menu for the user.
+    """
+    print("The Movie List Program")
+    print("======================")
+    print("\nCOMMAND MENU")
+    print("list - List all movies")
+    print("add  - Add a movie")
+    print("del  - Delete a movie")
+    print("exit - Exit program")
+    print()
+
+def display_movies(movies_list):
+    """
+    Displays all the movie titles contained in the list.
+    The list of movies is passed into this function as a parameter.
+    """
+    print("--- Movie List ---")
+    if not movies_list:
+        print("There are no movies in the list.\n")
+    else:
+        # Enumerate provides a count (i) starting from 1
+        for i, movie in enumerate(movies_list, 1):
+            print(f"{i}. {movie}")
+        print()
+
+def add_movie(movies_list):
+    """
+    Asks the user for a new movie title and adds it to the list.
+    It then calls the function to write the updated list back to the file.
+    """
+    movie = input("Enter the movie title to add: ")
+    movies_list.append(movie)
+    write_movies_to_file(movies_list) # Save the new list to the file
+    print(f"'{movie}' has been added.\n")
+
+def delete_movie(movies_list):
+    """
+    Asks the user for the number of the movie to delete.
+    It removes the movie from the list and calls the function
+    to write the updated list back to the file.
+    """
+    try:
+        # Display the list so the user can see the numbers
+        display_movies(movies_list)
+        if not movies_list:
+            return # Can't delete if the list is empty
+
+        number = int(input("Enter the number of the movie to delete: "))
+        
+        # Check if the number is valid
+        if number < 1 or number > len(movies_list):
+            print("Invalid movie number.\n")
+        else:
+            # Adjust for 0-based list index (user enters 1, we delete at index 0)
+            deleted_movie = movies_list.pop(number - 1)
+            write_movies_to_file(movies_list) # Save the new list to the file
+            print(f"'{deleted_movie}' has been deleted.\n")
+            
+    except ValueError:
+        print("Invalid input. Please enter a number.\n")
+
+def main():
+    """
+    The main function that runs the program loop.
+    """
+    # 1. Call function to populate the list from the file at the start
+    movie_list = read_movies_from_file()
+
+    # 2. Call function to display the menu
+    display_menu()
+
+    while True:
+        command = input("Command: ").lower().strip()
+
+        if command == "list":
+            # 5. Call function to display all titles
+            display_movies(movie_list)
+        elif command == "add":
+            # 3. Call function to add a title
+            add_movie(movie_list)
+        elif command == "del":
+            # 4. Call function to delete a title
+            delete_movie(movie_list)
+        elif command == "exit":
+            print("Bye!")
+            break
+        else:
+            print("Not a valid command. Please try again.\n")
+
+# This standard Python construct ensures that main() is called when the script is executed.
+if __name__ == "__main__":
+    main()
